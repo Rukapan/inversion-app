@@ -1,20 +1,19 @@
 import { createStore } from 'vuex'
 import imageCompression from "browser-image-compression";
 import { getUserData } from '../Firebase/database';
+import { getUserAlbum } from "../Firebase/storage";
 
 const store = createStore({
   state() {
     return {
-      screenLight: false,
+      screenFilter: false,
       fadeOut: false,
       windowState: new Map([
         ['login', false],
         ['tips', false],
         ['uploadAlbum', false],
+        ['userAlbum', false],
         ['profile', false],
-      ]),
-      compState: new Map([
-        ['allPhotos', false],
       ]),
       userData: {
         todayPost: true,
@@ -31,7 +30,8 @@ const store = createStore({
       otherUsers: new Map(),
       allPhotos: [[], [], [], []],
       photoCount: 0,
-      myAlbum: [],
+      userAlbum: [],
+      showOtherUserAlbum: false,
       albumPageToken: '',
       notificationCount: 0,
       alertMessage: "",
@@ -43,7 +43,6 @@ const store = createStore({
     },
     changeState(state, name) {
       state[name] = (state[name]) ? false : true;
-      console.log("firstUser")
     },
     changeWindow(state, name) {
       if (state.windowState.get(name)) {
@@ -53,7 +52,7 @@ const store = createStore({
             state.windowState.set(key, false);
           });
           state.fadeOut = false;
-          state.screenLight = false;
+          state.screenFilter = false;
         }, 100);
       } else {
         state.fadeOut = true;
@@ -62,21 +61,9 @@ const store = createStore({
             state.windowState.set(key, false);
           });
           state.fadeOut = false;
-          state.screenLight = true;
+          state.screenFilter = true;
           state.windowState.set(name, true);
         }, 100);
-      }
-    },
-    changeComp(state, name) {
-      if (state.compState.get(name)) {
-        state.compState.forEach((v, key) => {
-          state.compState.set(key, false);
-        });
-      } else {
-        state.compState.forEach((v, key) => {
-          state.compState.set(key, false);
-        });
-        state.compState.set(name, true);
       }
     },
     addUserData(state, payload) {
@@ -90,8 +77,19 @@ const store = createStore({
       state.allPhotos[state.photoCount].push(d);
       state.photoCount++;
     },
+    addUserAlbum(state, d) {
+      state.userAlbum.push(d);
+      if (state.userAlbum.length > 1) {
+        state.userAlbum.sort((a, b) => {
+          return (a.date > b.date ? -1 : 1);
+        });
+      }
+    },
     deleteAllPhotos(state) {
       state.allPhotos = [[], [], [], []];
+    },
+    deleteUserAlbum(state) {
+      state.userAlbum = [];
     },
     initializeAlbumPageToken(state) {
       state.albumPageToken = '';
@@ -126,16 +124,21 @@ const store = createStore({
       }
       return compBlob;
     },
+    async showUserAlbum(state, uid = store.state.userData.uid) {
+      this.commit('deleteUserAlbum');
+      const result = await getUserAlbum(uid);
+      if (result) {
+        this.state.showOtherUserAlbum = (uid !== this.state.userData.uid) ? uid : false;
+        this.commit('changeWindow', 'userAlbum');
+      } else {
+        this.commit('addAlertMessage', "Error!! Sorry, Please try it again.")
+      }
+    },
     async updateProfile() {
       await getUserData();
     },
     updateAlbum() {
-      this.commit('changeComp', 'allPhotos');
-      this.commit('initializeAlbumPageToken');
-      this.commit('deleteAllPhotos');
-      setTimeout(() => {
-        this.commit('changeComp', 'allPhotos');
-      }, 100);
+      location.reload()
     }
   }
 })

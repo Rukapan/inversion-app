@@ -35,8 +35,8 @@ module.exports = {
       },
       animation: {
         show: 'show 0.3s ease forwards',
-        fadeIn: 'fade 0.1s linear forwards',
-        fadeOut: 'fade 0.1s linear forwards reverse',
+        fadeIn: 'fade 0.1s linear',
+        fadeOut: 'fade 0.1s linear reverse',
         rumble: 'rumble 0.2s linear'
       }
     },
@@ -51,10 +51,9 @@ module.exports = {
       {
         mytheme: {
           "primary": "#C20024",
-          "secondary": "#224B8F",
-          "base-100": "#FFFFFD",
-          "base-200": "#F6F7F8",
-          "accent": "#525252",
+          "secondary": "#E6E6E6",
+          "base-100": "#FFFFFF",
+          "base-200": "#E6E6E6",
           "error": "#FFFFFD",
         },
       },

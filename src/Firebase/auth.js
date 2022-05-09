@@ -16,7 +16,6 @@ onAuthStateChanged(auth, async (user) => {
       email: auth.currentUser.email
     });
     if (!firstUse) await getUserData(auth.currentUser.uid);
-    store.commit('changeComp', 'allPhotos')
   } else {
     store.commit('changeWindow', 'login');
   }
@@ -30,7 +29,7 @@ export const userLogin = async (email, password) => {
       loginMessage = "login";
       setTimeout(() => {
         store.commit('changeWindow', 'login');
-      }, 4000);
+      }, 3000);
     })
     .catch((error) => {
       console.log(error)
@@ -54,7 +53,7 @@ export const userCreate = async (email, password) => {
       setTimeout(() => {
         store.commit('changeWindow', 'tips');
         uploadUserData();
-      }, 4000);
+      }, 3000);
     })
     .catch((error) => {
       firstUse = false;

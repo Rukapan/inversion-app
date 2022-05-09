@@ -69,7 +69,7 @@ export const getAllPhotos = async () => {
     }
     await currentPage.items.forEach(async (itemRef) => {
       //Get Image
-      const url = await getImage(itemRef);
+      const imageUrl = await getImage(itemRef);
       const metadata = await getImageMetadata(itemRef);
       const otherUid = metadata.customMetadata.uid
       if (!store.state.otherUsers.has(otherUid)) {
@@ -85,7 +85,7 @@ export const getAllPhotos = async () => {
         });
       }
       store.commit('addAllPhotos', {
-        image: url,
+        image: imageUrl,
         name: metadata.name,
         date: metadata.timeCreated.slice(0, 10).split("-").join("/"),
         uid: metadata.customMetadata.uid
@@ -98,6 +98,30 @@ export const getAllPhotos = async () => {
   } else {
     result = false;
   }
+  return result;
+}
+
+//Get UserAlbum
+export const getUserAlbum = async (userId) => {
+  let result;
+  const listRef = ref(storage, 'users/' + userId + '/album/');
+  await listAll(listRef)
+    .then(async (res) => {
+      result = true;
+      res.items.forEach(async (itemRef) => {
+        const imageUrl = await getImage(itemRef);
+        const metadata = await getImageMetadata(itemRef);
+        store.commit('addUserAlbum', {
+          image: imageUrl,
+          name: metadata.name.split("-")[0],
+          date: metadata.timeCreated.slice(0, 10).split("-").join("/")
+        });
+      });
+    })
+    .catch((error) => {
+      result = false;
+      console.log(error);
+    });
   return result;
 }
 
@@ -181,5 +205,5 @@ export const deleteUserStorage = async () => {
     .catch((error) => {
       console.log(error);
     })
-    return true;
+  return true;
 }
